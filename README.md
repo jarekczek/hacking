@@ -3,7 +3,7 @@ hacking toolkit
 
 ## Python
 
-### Service controller
+### [Service controller](https://github.com/jarekczek/hacking/tree/main/python/service_controller)
 
 To run different versions (configurations) of an arbitrary service (executable) and control it from
 http protocol.
