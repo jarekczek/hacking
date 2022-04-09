@@ -46,13 +46,15 @@ A sample windows service is provided as `example_service.bat`.
 - START_CONFIG (optional) number of first configuration to run (0 is the default)
 - ESPEAK (optional) espeak executable for speech anouncements, silently ignored on error
 - PORT http port on which to listen (only localhost)
-- SERVICE path of the executable accepting single integer [1 - CONFIG_COUNT]
+- RETRIES (optional) max retries when starting the service, default is 3
+- SERVICE path of the executable accepting single integer [0..CONFIG_COUNT)
 - SUCCESS_MESSAGE a message printed by the service on success
 
 #### Controller
 
 Controller is a web application, that understands simple urls:
 
+- /restart - stops the service if needed, starts until success (respecting RETRIES)
 - /start - starts the service, then increments configuration number
 - /stop - stops the service
 - /shutdown - shuts down the controller

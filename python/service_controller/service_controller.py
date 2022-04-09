@@ -11,6 +11,7 @@ configCount = int(os.environ['CONFIG_COUNT'])
 currentConfig = int(os.environ.get('START_CONFIG', '0')) - 1
 espeakExecutable = os.environ.get('ESPEAK', None)
 httpPort = int(os.environ['PORT'])
+maxRetries = int(os.environ.get('RETRIES', '3'))
 serviceExecutable = os.environ['SERVICE']
 successMessage = os.environ['SUCCESS_MESSAGE']
 
@@ -109,12 +110,41 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
       self.send_response(stopCode)
       handled = True
 
+    if self.path == '/restart':
+      self.restartService()
+      handled = True
+      
     if not handled:
       print('path not handled: ' + self.path)
       self.send_error(404)
       
     self.end_headers()
       
+  def restartService(self):
+    global maxRetries
+    startedOk = False
+    if self.server._service != None:
+      stopCode = self.server._service.stop()
+      print('service ' + str(currentConfig) + ' stopped: ' + str(stopCode))
+      if stopCode != 200:
+        raise Exception('problem stopping server ' + str(stopCode))
+
+    # now it is stopped, let's start until success
+    for i in range(0, maxRetries):
+      self.server._service = ServiceProcess()
+      startCode = self.server._service.start()
+      if startCode == 200:
+        startedOk = True
+        break
+      else:
+        self.server._service = None
+        
+    if startedOk:
+      self.send_response(200)
+    else:
+      speak('failed to restart service after ' + str(maxRetries) + ' retries')
+      self.send_error(500)
+  
       
 class Reader(threading.Thread):
   def __init__(self, stream, handlerClass):
