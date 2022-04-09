@@ -1,14 +1,14 @@
 @echo off
 
 if x%1 == x goto usage
-if %1 == 1 ( set par1=success& set par2=777& goto start )
-if %1 == 2 ( set par1=failure& set par2=888& goto start )
+if %1 == 0 ( set par1=success& set par2=777& goto start )
+if %1 == 1 ( set par1=failure& set par2=888& goto start )
 goto usage
 
 :usage
 
 echo Usage: example_service ^<config_number^>
-echo config_number: 1 or 2
+echo config_number: 0 or 1
 goto kon
 
 :start

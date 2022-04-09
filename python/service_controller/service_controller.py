@@ -8,7 +8,7 @@ import time
 from subprocess import Popen, CREATE_NEW_PROCESS_GROUP, PIPE, STDOUT
 
 configCount = int(os.environ['CONFIG_COUNT'])
-currentConfig = int(os.environ['START_CONFIG']) - 1
+currentConfig = int(os.environ.get('START_CONFIG', '0')) - 1
 espeakExecutable = os.environ.get('ESPEAK', None)
 httpPort = int(os.environ['PORT'])
 serviceExecutable = os.environ['SERVICE']

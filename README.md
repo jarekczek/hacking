@@ -22,7 +22,7 @@ Once started it runs until getting stopped from the controller.
 Service executable accepts a single integer argument, the number of a configuration to use.
 The service must translate this integer into some configuration.
 
-Configurations are numbered from 1 to CONFIG_COUNT.
+Configurations are numbered from 0 to CONFIG_COUNT-1.
 
 The service is expected to act in the following manner (based on some concrete service,
 for which this tool was designed):
@@ -43,7 +43,7 @@ A sample windows service is provided as `example_service.bat`.
 ##### Environment variables
 
 - CONFIG_COUNT number of configurations accepted by the service
-- START_CONFIG number of first configuration to run (1 is the default)
+- START_CONFIG (optional) number of first configuration to run (0 is the default)
 - ESPEAK (optional) espeak executable for speech anouncements, silently ignored on error
 - PORT http port on which to listen (only localhost)
 - SERVICE path of the executable accepting single integer [1 - CONFIG_COUNT]
