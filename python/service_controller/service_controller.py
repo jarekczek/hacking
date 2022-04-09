@@ -25,7 +25,7 @@ class ServiceProcess():
   def start(self):
     global serviceExecutable
     cfg = self.nextConfig()
-    print('config: ' + str(cfg))
+    print('starting from config: ' + str(cfg))
     self._process = Popen(['cmd', '/c', serviceExecutable, str(cfg)],
         stdout=PIPE, stderr=STDOUT,
         creationflags = CREATE_NEW_PROCESS_GROUP
@@ -35,12 +35,11 @@ class ServiceProcess():
     while True:
       time.sleep(1)
       if self._process.poll() != None:
-        speak('start failed')
+        speak('start ' + str(currentConfig) + ' failed')
         return 500
       if self.success:
-        speak('start OK')
+        speak('start ' + str(currentConfig) + ' succeeded')
         return 200
-      print('waiting')
       
   def stop(self):
     os.kill(self._process.pid, signal.CTRL_BREAK_EVENT)
@@ -48,14 +47,13 @@ class ServiceProcess():
     while True:
       time.sleep(1)
       if self._process.poll() != None:
-        speak('stop ok')
+        speak('stop ' + str(currentConfig) + ' ok')
         return 200
-      print('waiting for stop')
       
   def handleRead(self, line):
     global successMessage
     if successMessage in line:
-      print('started successfully')
+      print('started successfully ' + str(currentConfig))
       self.success = True
       
   def nextConfig(self):
@@ -84,6 +82,10 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
       self.send_response(200)
       handled = True
     
+    if self.path == '/status':
+      self.send_response(200)
+      handled = True
+    
     if self.path == '/shutdown':
       print('shutdown called')
       self.send_response(200)
@@ -102,7 +104,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
     if self.path == '/stop':
       assert self.server._service != None
       stopCode = self.server._service.stop()
-      print('server stopped: ' + str(stopCode))
+      print('service ' + str(currentConfig) + ' stopped: ' + str(stopCode))
       self.server._service = None
       self.send_response(stopCode)
       handled = True
@@ -152,6 +154,7 @@ def speak(text):
     pass
 
 httpd = MyServer(('localhost', httpPort), MyRequestHandler)
+print('http server ready')
 
 while not stopApp:
   #print('still handling: ' + str(stopApp))
