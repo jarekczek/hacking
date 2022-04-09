@@ -48,7 +48,7 @@ class ServiceProcess():
     while True:
       time.sleep(1)
       if self._process.poll() != None:
-        speak('stop ' + str(currentConfig) + ' ok')
+        speak('stopped ' + str(currentConfig))
         return 200
       
   def handleRead(self, line):
@@ -128,6 +128,8 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
       print('service ' + str(currentConfig) + ' stopped: ' + str(stopCode))
       if stopCode != 200:
         raise Exception('problem stopping server ' + str(stopCode))
+      # after stopping, give it a while to make all resources really free
+      time.sleep(2)
 
     # now it is stopped, let's start until success
     for i in range(0, maxRetries):
@@ -176,6 +178,7 @@ class Reader(threading.Thread):
 
 def speak(text):
   global espeakExecutable
+  print(text)
   if espeakExecutable == None:
     return
   try:
