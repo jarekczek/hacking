@@ -31,9 +31,7 @@ for which this tool was designed):
 - On failure the service exits.
 
 If the service keeps running, but does not display the success message, the controller keeps on waiting.
-In other words - it hangs.
-This is not desired and means that the controller is unable to control the service
-and something needs to be changed.
+In other words - it hangs. To solve such cases a SERVICE_TIMEOUT may be given.
 
 When controller stops the service, it sends control-break to it.
 The service should shut down after receiving this signal.
@@ -48,6 +46,7 @@ A sample windows service is provided as `example_service.bat`.
 - PORT http port on which to listen (only localhost)
 - RETRIES (optional) max retries when starting the service, default is 3
 - SERVICE path of the executable accepting single integer [0..CONFIG_COUNT)
+- SERVICE_TIMEOUT (optional)number of seconds for the service to start
 - SUCCESS_MESSAGE a message printed by the service on success
 
 #### Controller
@@ -66,12 +65,13 @@ starting the service each time with a different configuration.
 
 #### Example service
 
-`example_service.bat` is a simulation of a service. It has two configurations:
+`example_service.bat` is a simulation of a service. It has several configurations:
 
 1. displays some messages, reports success, keeps running
 2. displays some messages, stops running
+3. displays some messages, hangs
 
-So `1` is a successful start, `2` is showing a failure case.
+So `1` is a successful start, others are showing failure cases.
 
 After starting `service_controller.bat` one may issue server commands.
 A reasonable sequence of command is like this:
@@ -79,4 +79,5 @@ A reasonable sequence of command is like this:
 1. start - would start a successful run
 1. stop
 1. start - would start a service which fails
-1. one may loop from the beginning, as the previous start did not succeed
+1. start - would start a service which fails
+1. one may loop from the beginning, as the previous starts did not succeed

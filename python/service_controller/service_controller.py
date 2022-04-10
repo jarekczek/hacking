@@ -13,6 +13,7 @@ espeakExecutable = os.environ.get('ESPEAK', None)
 httpPort = int(os.environ['PORT'])
 maxRetries = int(os.environ.get('RETRIES', '3'))
 serviceExecutable = os.environ['SERVICE']
+serviceTimeout = int(os.environ.get('SERVICE_TIMEOUT', '0'))
 successMessage = os.environ['SUCCESS_MESSAGE']
 
 stopApp = False
@@ -21,11 +22,14 @@ class ServiceProcess():
 
   def __init__(self):
     self.success = False
+    self.forceStop = True
     self._process = None
     
   def start(self):
     global serviceExecutable
+    self.forceStop = False
     cfg = self.nextConfig()
+    t0 = time.time()
     print('starting from config: ' + str(cfg))
     self._process = Popen(['cmd', '/c', serviceExecutable, str(cfg)],
         stdout=PIPE, stderr=STDOUT,
@@ -41,8 +45,16 @@ class ServiceProcess():
       if self.success:
         speak('start ' + str(currentConfig) + ' succeeded')
         return 200
+      elapsed = time.time() - t0
+      if serviceTimeout != 0 and elapsed > serviceTimeout:
+        speak('should timeout')
+        stopCode = self.stop()
+        if stopCode != 200:
+          return 501
+        return 502
       
   def stop(self):
+    self.forceStop = True
     os.kill(self._process.pid, signal.CTRL_BREAK_EVENT)
     self._process.terminate()
     while True:
@@ -53,8 +65,7 @@ class ServiceProcess():
       
   def handleRead(self, line):
     global successMessage
-    if successMessage in line:
-      print('started successfully ' + str(currentConfig))
+    if not self.forceStop and successMessage in line:
       self.success = True
       
   def nextConfig(self):
@@ -182,7 +193,7 @@ def speak(text):
   if espeakExecutable == None:
     return
   try:
-    Popen([espeakExecutable, '-s', '250', text])
+    Popen([espeakExecutable, '-s', '250', '-a', '200', text])
   except:
     pass
 
