@@ -84,27 +84,34 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
   
   def __init__(self, a1, a2, a3):
     http.server.BaseHTTPRequestHandler.__init__(self, a1, a2, a3)
+
+  def pathOnly(self):
+    return self.path.split('?')[0]
     
   def do_GET(self):
     global stopApp
     handled = False
     
-    if self.path == '/hello':
+    if self.pathOnly() == '/hello':
       speak("hello")
       self.send_response(200)
       handled = True
     
-    if self.path == '/status':
+    if self.pathOnly() == '/status':
       self.send_response(200)
       handled = True
     
-    if self.path == '/shutdown':
+    if self.pathOnly() == '/ison':
+      self.send_response(200 if self.server._service != None else 100)
+      handled = True
+
+    if self.pathOnly() == '/shutdown':
       print('shutdown called')
       self.send_response(200)
       stopApp = True
       handled = True
       
-    if self.path == '/start':
+    if self.pathOnly() == '/start':
       assert self.server._service == None
       self.server._service = ServiceProcess()
       startCode = self.server._service.start()
@@ -113,7 +120,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
       self.send_response(startCode)
       handled = True
 
-    if self.path == '/stop':
+    if self.pathOnly() == '/stop':
       assert self.server._service != None
       stopCode = self.server._service.stop()
       print('service ' + str(currentConfig) + ' stopped: ' + str(stopCode))
@@ -121,7 +128,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
       self.send_response(stopCode)
       handled = True
 
-    if self.path == '/restart':
+    if self.pathOnly() == '/restart':
       self.restartService()
       handled = True
       
