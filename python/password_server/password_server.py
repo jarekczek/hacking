@@ -62,7 +62,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
     content_len = int(self.headers.get('Content-Length'))
     if self.bodyBytes == None:
       self.bodyBytes = self.rfile.read(content_len)
-    return self.bodyBytes.decode('iso-8859-1')
+    return self.bodyBytes.decode('utf-8')
 
   def do_GET(self):
     handled = False
@@ -104,7 +104,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
     self.end_headers()
     if len(body) > 0:
       for line in body:
-        self.wfile.write(bytes(line + '\n', 'iso-8859-1'))
+        self.wfile.write(bytes(line + '\n', 'utf-8'))
 
   def do_POST(self):
     handled = False
@@ -114,12 +114,12 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
       source = self.path.split('/')[2]
       if source == '':
         raise 'no source given'
-      print('handling ' + self.bodyStr())
       added = 0
       for word in self.bodyStr().split('\n'):
         word = re.sub("[ \r\n]", "", word)
         if word == '':
           continue
+        print('processing ' + word)
         added += self.server.dao.addPassword(word, source)
       self.send_response(200)
       respBody.append('added: ' + str(added))
@@ -141,7 +141,7 @@ class MyRequestHandler(http.server.BaseHTTPRequestHandler):
     self.end_headers()
     if len(respBody) > 0:
       for line in respBody:
-        self.wfile.write(bytes(line + '\n', 'iso-8859-1'))
+        self.wfile.write(bytes(line + '\n', 'utf-8'))
 
 httpd = MyServer(('localhost', 7978), MyRequestHandler)
 print('http password server ready')
